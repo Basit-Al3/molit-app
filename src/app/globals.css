@@ -1,26 +1,416 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------
+   Molit design tokens
+   Paper + ink + one highlighter. That's the whole palette.
+------------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --paper: #f3efe6;
+  --paper-2: #e9e4d8;
+  --paper-3: #ddd7c8;
+  --ink: #101010;
+  --ink-2: #3b3a36;
+  --muted: #7a766c;
+  --line: rgba(16, 16, 16, 0.14);
+  --line-strong: rgba(16, 16, 16, 0.32);
+  --lime: #d8ff3d;
+  --lime-deep: #b9e21a;
+  --red: #e0442a;
+  --radius: 14px;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-paper-3: var(--paper-3);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-lime: var(--lime);
+  --color-lime-deep: var(--lime-deep);
+  --color-red: var(--red);
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, "SF Mono", Menlo, monospace;
+  --radius-card: var(--radius);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  position: relative;
+  min-height: 100%;
+}
+
+/* Paper grain — a single SVG noise layer, fixed, never scrolls. */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.12 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+body > * {
+  position: relative;
+  z-index: 1;
+}
+
+::selection {
+  background: var(--lime);
+  color: var(--ink);
+}
+
+@layer components {
+/* ---- Typography helpers ---- */
+.display {
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 0.98;
+}
+.display-md {
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
+}
+.eyebrow {
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.num {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+/* Highlighter mark: text sits on a lime slab, slightly off-axis like a real pen. */
+.hl {
+  position: relative;
+  display: inline-block;
+  padding: 0 0.12em;
+  z-index: 0;
+  white-space: nowrap;
+}
+.hl::before {
+  content: "";
+  position: absolute;
+  inset: 0.1em -0.08em 0.06em -0.08em;
+  background: var(--lime);
+  transform: rotate(-1.2deg) skewX(-4deg);
+  z-index: -1;
+  border-radius: 3px;
+}
+
+/* ---- Rules / borders ---- */
+.rule {
+  border-top: 1px solid var(--line);
+}
+.rule-strong {
+  border-top: 2px solid var(--ink);
+}
+
+/* ---- Buttons ---- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  border-radius: 999px;
+  padding: 0.95rem 1.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  border: 1.5px solid var(--ink);
+  transition: transform 160ms ease, background-color 160ms ease, color 160ms ease, box-shadow 160ms ease;
+  white-space: nowrap;
+}
+.btn:active {
+  transform: translateY(1px);
+}
+.btn-ink {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn-ink:hover {
+  background: var(--lime);
+  color: var(--ink);
+  border-color: var(--ink);
+}
+.btn-ghost {
+  background: transparent;
+  color: var(--ink);
+}
+.btn-ghost:hover {
+  background: var(--ink);
+  color: var(--paper);
+}
+.btn-lime {
+  background: var(--lime);
+  color: var(--ink);
+}
+.btn-lime:hover {
+  background: var(--ink);
+  color: var(--lime);
+}
+.btn-sm {
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* ---- Inputs ---- */
+.field {
+  width: 100%;
+  background: transparent;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  color: var(--ink);
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+.field::placeholder {
+  color: var(--muted);
+}
+.field:focus {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 4px rgba(216, 255, 61, 0.55);
+}
+
+/* ---- Cards ---- */
+.card {
+  background: var(--paper);
+  border: 1.5px solid var(--ink);
+  border-radius: var(--radius);
+}
+.card-soft {
+  background: rgba(255, 255, 255, 0.35);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+}
+
+/* ---- Marquee ---- */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 38s linear infinite;
+}
+.marquee:hover .marquee-track {
+  animation-play-state: paused;
+}
+
+/* ---- Page-load reveal ---- */
+@keyframes rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.rise {
+  opacity: 0;
+  animation: rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+.d1 { animation-delay: 60ms; }
+.d2 { animation-delay: 160ms; }
+.d3 { animation-delay: 260ms; }
+.d4 { animation-delay: 380ms; }
+.d5 { animation-delay: 520ms; }
+.d6 { animation-delay: 680ms; }
+
+@keyframes pop {
+  0% { opacity: 0; transform: translateY(8px) scale(0.98); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.pop {
+  opacity: 0;
+  animation: pop 420ms cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+.blink {
+  animation: blink 1.4s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .rise, .pop { animation: none; opacity: 1; transform: none; }
+  .marquee-track { animation: none; }
+  .blink { animation: none; }
+  html { scroll-behavior: auto; }
+}
+
+/* ---- Stickers: rotated pills that look slapped on ---- */
+@layer components {
+  .sticker {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.45em 0.9em;
+    border: 1.5px solid var(--ink);
+    border-radius: 999px;
+    background: var(--paper);
+    font-weight: 600;
+    font-size: 0.85rem;
+    letter-spacing: -0.01em;
+    box-shadow: 3px 3px 0 0 var(--ink);
+    white-space: nowrap;
+    transition: transform 160ms ease;
+  }
+  .sticker:hover {
+    transform: rotate(0deg) scale(1.04) !important;
+  }
+  .sticker-lime {
+    background: var(--lime);
+  }
+  .sticker-ink {
+    background: var(--ink);
+    color: var(--paper);
+  }
+
+  /* Torn-edge receipt bottom */
+  .receipt-edge {
+    --tooth: 10px;
+    padding-bottom: var(--tooth);
+    clip-path: polygon(
+      0 0, 100% 0, 100% calc(100% - var(--tooth)),
+      97.5% 100%, 95% calc(100% - var(--tooth)), 92.5% 100%, 90% calc(100% - var(--tooth)),
+      87.5% 100%, 85% calc(100% - var(--tooth)), 82.5% 100%, 80% calc(100% - var(--tooth)),
+      77.5% 100%, 75% calc(100% - var(--tooth)), 72.5% 100%, 70% calc(100% - var(--tooth)),
+      67.5% 100%, 65% calc(100% - var(--tooth)), 62.5% 100%, 60% calc(100% - var(--tooth)),
+      57.5% 100%, 55% calc(100% - var(--tooth)), 52.5% 100%, 50% calc(100% - var(--tooth)),
+      47.5% 100%, 45% calc(100% - var(--tooth)), 42.5% 100%, 40% calc(100% - var(--tooth)),
+      37.5% 100%, 35% calc(100% - var(--tooth)), 32.5% 100%, 30% calc(100% - var(--tooth)),
+      27.5% 100%, 25% calc(100% - var(--tooth)), 22.5% 100%, 20% calc(100% - var(--tooth)),
+      17.5% 100%, 15% calc(100% - var(--tooth)), 12.5% 100%, 10% calc(100% - var(--tooth)),
+      7.5% 100%, 5% calc(100% - var(--tooth)), 2.5% 100%, 0 calc(100% - var(--tooth))
+    );
+  }
+
+  /* Hand-drawn scribble underline */
+  .scribble {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 12' preserveAspectRatio='none'%3E%3Cpath d='M2 8 C 40 2, 80 12, 120 6 S 180 4, 198 8' fill='none' stroke='%23d8ff3d' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-size: 100% 0.35em;
+    background-position: 0 92%;
+    padding-bottom: 0.08em;
+  }
+
+  /* Dotted paper grid for section backgrounds */
+  .dotgrid {
+    background-image: radial-gradient(var(--line-strong) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+  .dotgrid-dark {
+    background-image: radial-gradient(rgba(243, 239, 230, 0.13) 1px, transparent 1px);
+    background-size: 22px 22px;
+  }
+
+  .bubble-you {
+    background: var(--lime);
+    color: var(--ink);
+    border-radius: 18px 18px 6px 18px;
+  }
+  .bubble-molit {
+    background: var(--ink);
+    color: var(--paper);
+    border-radius: 18px 18px 18px 6px;
+  }
+}
+
+@keyframes wiggle {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+.wiggle:hover {
+  animation: wiggle 300ms ease-in-out 2;
+}
+
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-3px); opacity: 1; }
+}
+.typing span {
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  margin-right: 3px;
+  animation: typing-dot 1s infinite;
+}
+.typing span:nth-child(2) { animation-delay: 0.15s; }
+.typing span:nth-child(3) { animation-delay: 0.3s; }
+
+/* ---- Phone frame for the hero demo ---- */
+.phone {
+  border-radius: 44px;
+  background: var(--ink);
+  padding: 10px;
+  box-shadow: 0 30px 60px -20px rgba(16, 16, 16, 0.45), 0 0 0 1px rgba(16, 16, 16, 0.6);
+}
+.phone-screen {
+  border-radius: 36px;
+  background: var(--paper);
+  overflow: hidden;
+  position: relative;
+}
+.phone-island {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 92px;
+  height: 26px;
+  border-radius: 999px;
+  background: var(--ink);
+  z-index: 5;
+}
+
+/* ---- Details / FAQ ---- */
+details summary {
+  list-style: none;
+  cursor: pointer;
+}
+details summary::-webkit-details-marker {
+  display: none;
+}
+details[open] .chev {
+  transform: rotate(45deg);
+}
+.chev {
+  transition: transform 200ms ease;
+}
+
+/* ---- Chart tooltips (SVG) ---- */
+.bar-group .tip {
+  opacity: 0;
+  transition: opacity 120ms ease;
+  pointer-events: none;
+}
+.bar-group:hover .tip,
+.bar-group:focus-within .tip {
+  opacity: 1;
+}
+.bar-group:hover .bar {
+  fill: var(--lime-deep);
 }
