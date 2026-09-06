@@ -34,6 +34,9 @@ export function SiteFooter() {
           <Link className="block hover:underline" href="/#honest">
             Honest FAQ
           </Link>
+          <Link className="block hover:underline" href="/privacy">
+            Privacy
+          </Link>
           <span className="block text-muted">© {new Date().getFullYear()} Molit</span>
         </div>
       </div>
