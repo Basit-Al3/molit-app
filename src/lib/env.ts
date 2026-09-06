@@ -15,6 +15,16 @@ export function requireEnv(name: string): string {
   return v;
 }
 
+/**
+ * Postgres connection string. Accepts the Vercel/Supabase integration's
+ * POSTGRES_URL as well as a plain DATABASE_URL.
+ */
+export function databaseUrl(): string {
+  const v = optionalEnv("DATABASE_URL") ?? optionalEnv("POSTGRES_URL") ?? optionalEnv("POSTGRES_PRISMA_URL");
+  if (!v) throw new Error("Missing DATABASE_URL (or POSTGRES_URL)");
+  return v;
+}
+
 export const env = {
   get appUrl() {
     return optionalEnv("APP_URL") ?? optionalEnv("NEXT_PUBLIC_APP_URL") ?? "http://localhost:3000";

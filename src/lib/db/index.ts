@@ -1,7 +1,7 @@
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import * as schema from "./schema";
-import { requireEnv } from "@/lib/env";
+import { databaseUrl } from "@/lib/env";
 
 /**
  * A single postgres-js pool per process. In dev, Next hot-reloads modules,
@@ -12,7 +12,7 @@ const globalForDb = globalThis as unknown as { __molitSql?: ReturnType<typeof po
 
 function getSql() {
   if (!globalForDb.__molitSql) {
-    globalForDb.__molitSql = postgres(requireEnv("DATABASE_URL"), {
+    globalForDb.__molitSql = postgres(databaseUrl(), {
       max: 5,
       prepare: false,
       idle_timeout: 20,

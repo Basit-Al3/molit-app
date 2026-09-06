@@ -10,8 +10,8 @@ import { join } from "node:path";
 import postgres from "postgres";
 
 async function main() {
-  const url = process.env.DATABASE_URL;
-  if (!url) throw new Error("DATABASE_URL is not set");
+  const url = process.env.DATABASE_URL ?? process.env.POSTGRES_URL ?? process.env.POSTGRES_PRISMA_URL;
+  if (!url) throw new Error("DATABASE_URL (or POSTGRES_URL) is not set");
   const sql = postgres(url, { max: 1, prepare: false });
   await sql`create table if not exists _migrations (name text primary key, applied_at timestamptz not null default now())`;
   const applied = new Set((await sql`select name from _migrations`).map((r) => r.name as string));
